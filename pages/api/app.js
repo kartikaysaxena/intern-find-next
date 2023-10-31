@@ -1,7 +1,8 @@
 // api/hello.js
 const fs = require('fs');
 var nodemailer = require('nodemailer');
-const filePath = '../../content.txt';
+const path = require('path')
+const filePath = path.join(process.cwd(), 'public', 'content.txt');;
 const textData = fs.readFileSync(filePath, 'utf8')
 
 var transporter = nodemailer.createTransport({
@@ -21,7 +22,7 @@ var mailOptions = {
     attachments : [
         {
             filename: 'Resume_Kartikay.pdf',
-            path: '../../Resume_Kartikay.pdf'
+            path: path.join(process.cwd(), 'public', 'Resume_Kartikay')
         }
     ]
     
