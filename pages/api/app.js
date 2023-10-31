@@ -21,8 +21,8 @@ var mailOptions = {
     text: fs.readFileSync(filePath, 'utf8'),
     attachments : [
         {
-            filename: 'Resume_Kartikay.pdf',
-            path: path.join(process.cwd(), 'public', 'Resume_Kartikay')
+            filename: 'Resume_Kartikay',
+            path: path.join(process.cwd(), 'public', 'Resume_Kartikay.pdf')
         }
     ]
     
@@ -32,8 +32,7 @@ async function main() {
     var data = await fetch('https://script.google.com/macros/s/AKfycbyO3S2CWxqsaFgzD8313-dksFBCQ_cbx48kiIey1t_NtsbMzm0gCNBlQNUzTn0v3DR8/exec');
     var json = await data.json();
     console.log(json)
-    json.forEach(item => {
-        
+    json.forEach(async item => {
 
         mailOptions.text = textData
         mailOptions.to = item.email;
@@ -44,9 +43,11 @@ async function main() {
         } else if(item.isMale===1) {
             mailOptions.text = "Dear Sir" + mailOptions.text.split('$')[0] + item.company + mailOptions.text.split('$')[1]; 
         }
-        transporter.sendMail(mailOptions,async function(error, info){
+        await new Promise((resolve,reject) => {
+          transporter.sendMail(mailOptions,async function(error, info){
             if (error) {
               console.log(error);
+              reject(error)
             } else {
               var sentMail = {}
               sentMail.company = item.company
@@ -57,14 +58,18 @@ async function main() {
                     method: 'POST',
                     body: JSON.stringify(sentMail)
                   })
-                  const responseData = await response.text();
+                  const responseData = await updateSentEmails.text();
                   console.log(responseData);
+                  resolve(info)
               }
               catch {
                 console.log('err')
+                resolve(info)
               }
             }
           });
+        })
+
     })
 }
 export default async function handler(req, res) {
