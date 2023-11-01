@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           date: getCurrentDate()
         };
         console.log('Email sent:', info.response);
-        const updateSentEmails = await fetch("https://script.google.com/macros/s/AKfycbz3eR18bmbL47z-7cEhQI5eSgSepOkGJ-yauDtqsxbuVlqRaYk4LVDrbr1gwivXj-JcpA/exec", {
+        const updateSentEmails = await fetch("https://script.google.com/macros/s/AKfycbwQojRIk8eBxRJET1EWWWb_MOCRb3mdpbho6GKGTb3wI2_APijJzn1BuuJ5EDW_ZzekoQ/exec", {
           method: 'POST',
           body: JSON.stringify(sentMail)
         });
