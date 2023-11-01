@@ -48,9 +48,16 @@ export default async function handler(req, res) {
 
       try {
         const info = await transporter.sendMail(mailOptions);
+        const getCurrentDate = () => {
+          const today = new Date();
+          const day = String(today.getDate()).padStart(2, '0');
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          return `${day}/${month}`;
+        };
         const sentMail = {
           company: item.company,
-          email: item.email
+          email: item.email,
+          date: getCurrentDate()
         };
         console.log('Email sent:', info.response);
         const updateSentEmails = await fetch("https://script.google.com/macros/s/AKfycbz3eR18bmbL47z-7cEhQI5eSgSepOkGJ-yauDtqsxbuVlqRaYk4LVDrbr1gwivXj-JcpA/exec", {
