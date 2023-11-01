@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         text: textData,
         attachments: [
           {
-            filename: 'Resume_Kartikay.pdf',
+            filename: 'Resume_Kartikay',
             path: path.join(process.cwd(), 'public', 'Resume_Kartikay.pdf')
           }
         ]
