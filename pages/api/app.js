@@ -11,8 +11,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: 'kartikaysaxena12@gmail.com',
-    pass: 'stdswtkaasyoonpq'
+    user: process.env.SMTP_USER, 
+    pass: process.env.SMTP_PASS
   }
 });
 
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     const json = await data.json();
     console.log(json);
 
-    for (const item of json) {
+    const mailPromises = json.map(async item => {
       const mailOptions = {
         from: 'kartikaysaxena12@gmail.com',
         to: item.email,
@@ -46,34 +46,25 @@ export default async function handler(req, res) {
         mailOptions.text = `Dear Sir ${textData.split('$')[0] + item.company + textData.split('$')[1]}`;
       }
 
-      await new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.log(error);
-            reject(error);
-          } else {
-            const sentMail = {
-              company: item.company,
-              email: item.email
-            };
-            console.log('Email sent:', info.response);
-            fetch("https://script.google.com/macros/s/AKfycbz3eR18bmbL47z-7cEhQI5eSgSepOkGJ-yauDtqsxbuVlqRaYk4LVDrbr1gwivXj-JcpA/exec", {
-              method: 'POST',
-              body: JSON.stringify(sentMail)
-            })
-              .then(response => response.text())
-              .then(responseData => {
-                console.log(responseData);
-                resolve(info);
-              })
-              .catch(err => {
-                console.log('err', err);
-                resolve(info);
-              });
-          }
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        const sentMail = {
+          company: item.company,
+          email: item.email
+        };
+        console.log('Email sent:', info.response);
+        const updateSentEmails = await fetch("https://script.google.com/macros/s/AKfycbz3eR18bmbL47z-7cEhQI5eSgSepOkGJ-yauDtqsxbuVlqRaYk4LVDrbr1gwivXj-JcpA/exec", {
+          method: 'POST',
+          body: JSON.stringify(sentMail)
         });
-      });
-    }
+        const responseData = await updateSentEmails.text();
+        console.log(responseData);
+      } catch (error) {
+        console.error('Error sending email:', error);
+      }
+    });
+
+    await Promise.all(mailPromises);
 
     res.status(200).json({ message: 'Emails sent successfully!' });
   } catch (error) {

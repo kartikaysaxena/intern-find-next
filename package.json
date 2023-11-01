@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "dotenv": "^16.3.1",
     "fs": "^0.0.1-security",
     "next": "14.0.1",
     "node-fetch": "^3.3.2",
