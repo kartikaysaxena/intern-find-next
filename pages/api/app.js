@@ -22,6 +22,8 @@ export default async function handler(req, res) {
     const json = await data.json();
     console.log(json);
 
+    const sentMails = [];
+
     const mailPromises = json.map(async item => {
       const mailOptions = {
         from: 'kartikaysaxena12@gmail.com',
@@ -60,12 +62,7 @@ export default async function handler(req, res) {
           date: getCurrentDate()
         };
         console.log('Email sent:', info.response);
-        const updateSentEmails = await fetch("https://script.google.com/macros/s/AKfycbwQojRIk8eBxRJET1EWWWb_MOCRb3mdpbho6GKGTb3wI2_APijJzn1BuuJ5EDW_ZzekoQ/exec", {
-          method: 'POST',
-          body: JSON.stringify(sentMail)
-        });
-        const responseData = await updateSentEmails.text();
-        console.log(responseData);
+        sentMails.push(sentMail);
       } catch (error) {
         console.error('Error sending email:', error);
       }
@@ -73,7 +70,19 @@ export default async function handler(req, res) {
 
     await Promise.all(mailPromises);
 
-    res.status(200).json({ message: 'Emails sent successfully!' });
+    // Batch update sent emails
+    try {
+      const updateSentEmails = await fetch("https://script.google.com/macros/s/AKfycbzfwOQqQ-ys3cf9AK_asr_NLVeKdCC83equKDbaIWhQP820uZuKIYrBUhEfXhNEHLgGMA/exec", {
+        method: 'POST',
+        body: JSON.stringify(sentMails)
+      });
+      const responseData = await updateSentEmails.text();
+      console.log(responseData);
+    } catch (error) {
+      console.error('Error updating sent emails:', error);
+    }
+
+    res.status(200).json({ message: 'Emails sent and updated successfully!' });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
